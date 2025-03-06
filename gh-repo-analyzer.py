@@ -468,7 +468,7 @@ Provide a clear, well-structured summary highlighting:
 
 def main():
     parser = argparse.ArgumentParser(description='Analyze GitHub repositories and generate a summary report.')
-    parser.add_argument('--limit', type=int, default=5, help='Maximum number of repositories to analyze (default: 5)')
+    parser.add_argument('--limit', type=int, default=None, help='Maximum number of repositories to analyze (default: all)')
     parser.add_argument('--no-openai', action='store_true',
                         help='Skip OpenAI API calls and use fallback summaries only')
     args = parser.parse_args()

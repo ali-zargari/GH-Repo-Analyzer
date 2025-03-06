@@ -58,14 +58,14 @@ python gh-repo-analyzer.py
 
 ### Command Line Options
 
-- `--limit N`: Analyze only the N most recent repositories (default: 5)
+- `--limit N`: Analyze only N repositories (if not specified, analyzes all repositories)
 - `--no-openai`: Skip OpenAI API calls and use fallback summaries only
 
 Examples:
 
 ```
-# Analyze all repositories
-python gh-repo-analyzer.py --limit 0
+# Analyze all repositories (default behavior)
+python gh-repo-analyzer.py
 
 # Analyze 10 repositories
 python gh-repo-analyzer.py --limit 10
