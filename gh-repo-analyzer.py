@@ -278,7 +278,7 @@ class GitHubRepoAnalyzer:
             structure_text = "\n".join(structure_overview[:50])  # Increased from 30 to 50 items
 
             prompt = f"""
-You are a technical expert analyzing a software project. Based on the following information, make informed assumptions about the project's purpose, technologies, and functionality. Focus on analyzing the code, file names, and structure rather than just descriptions.
+You are a technical expert analyzing a software project. Based on the following information, make definitive statements about the project's purpose, technologies, and functionality. Focus on analyzing the code, file names, and structure rather than just descriptions.
 
 Project Name: {repo_data['name']}
 Created On: {repo_data['created_at'].strftime('%Y-%m-%d')}
@@ -302,30 +302,30 @@ File Structure Overview:
 README Excerpt:
 {readme_excerpt}
 
-Based on the code samples, file names, and project structure, provide a detailed analysis of this project. Make intelligent assumptions about what the project does, how it works, and its purpose. Don't just rely on the README or project name.
+Based on the code samples, file names, and project structure, provide a definitive analysis of this project. Make authoritative statements about what the project does, how it works, and its purpose. Do not use hedging language like "appears to be", "likely", "suggests", "potentially", "indicates", etc. Instead, use confident, assertive language with definitive statements.
 
 Respond with a JSON object in the following format:
 {{
   "name": "{repo_data['name']}",
   "year": {repo_data['created_at'].strftime('%Y')},
-  "purpose": "A detailed description of what this project does and its main purpose. Avoid using the word 'repository'.",
+  "purpose": "A definitive description of what this project does and its main purpose. Use assertive language and avoid using the word 'repository'.",
   "technologies": ["List", "of", "key", "technologies", "used"],
   "features": ["List", "of", "main", "features", "or", "capabilities"],
-  "architecture": "Brief description of the project's architecture or structure",
-  "complexity": "Assessment of the project's technical complexity (Low, Medium, High)"
+  "architecture": "Definitive description of the project's architecture or structure",
+  "complexity": "Confident assessment of the project's technical complexity (Low, Medium, High)"
 }}
 
-Ensure your response is valid JSON. Make your purpose description detailed and specific, focusing on what the project actually does rather than generic descriptions.
+Ensure your response is valid JSON. Make your purpose description detailed, specific, and assertive, focusing on what the project actually does rather than generic descriptions. Do not use hedging language - be confident and definitive in your analysis.
 """
             try:
                 response = client.chat.completions.create(
                     model="gpt-4-turbo",  # Using GPT-4 for better code analysis
                     messages=[
                         {"role": "system",
-                         "content": "You are a technical expert with deep knowledge of software development, programming languages, and system architecture. Your task is to analyze project information and provide detailed, technically accurate assessments based on code analysis rather than descriptions."},
+                         "content": "You are a technical expert with deep knowledge of software development, programming languages, and system architecture. Your task is to analyze project information and provide definitive, authoritative assessments based on code analysis. Use confident, assertive language without hedging terms like 'appears to be', 'likely', 'suggests', 'potentially', 'indicates', etc. Make definitive statements about what the project is and does."},
                         {"role": "user", "content": prompt}
                     ],
-                    temperature=0.3,  # Lower temperature for more focused, precise output
+                    temperature=0.1,  # Very low temperature for more focused, assertive output
                     max_tokens=1000,   # Increased token limit for more detailed responses
                     response_format={"type": "json_object"}  # Ensure JSON response
                 )
