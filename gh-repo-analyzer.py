@@ -9,6 +9,10 @@ import base64
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Any
+import sys
+import time
+import platform
+import threading
 
 import json
 from dotenv import load_dotenv
@@ -30,6 +34,59 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Initialize OpenAI client (new SDK 1.0+)
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+# Determine if we're on Windows
+IS_WINDOWS = platform.system() == 'Windows'
+
+# Import platform-specific modules for keyboard input
+if IS_WINDOWS:
+    import msvcrt
+else:
+    import select
+    import termios
+    import tty
+
+# Global variable to track skip request
+skip_current_repo = False
+skip_lock = threading.Lock()
+
+def key_listener_thread():
+    """Background thread that listens for 'S' key press to skip current repository."""
+    global skip_current_repo
+    
+    try:
+        while True:
+            key = None
+            
+            # Platform-specific key detection
+            if IS_WINDOWS:
+                if msvcrt.kbhit():
+                    key = msvcrt.getch().decode('utf-8').lower()
+            else:
+                # Unix implementation
+                old_settings = None
+                try:
+                    fd = sys.stdin.fileno()
+                    old_settings = termios.tcgetattr(fd)
+                    tty.setraw(fd)
+                    
+                    if select.select([sys.stdin], [], [], 0.1)[0]:
+                        key = sys.stdin.read(1).lower()
+                finally:
+                    # Restore terminal settings
+                    if old_settings:
+                        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+            
+            # Check if 'S' was pressed
+            if key == 's':
+                with skip_lock:
+                    skip_current_repo = True
+                    print("\nSkip requested. Will skip current repository when possible...")
+            
+            time.sleep(0.1)  # Small sleep to prevent CPU hogging
+    except Exception as e:
+        print(f"\nKey listener thread error: {e}")
+        # Continue without key listening if there's an error
 
 FRAMEWORK_PATTERNS = {
     "package.json": {"type": "json", "dependencies": ["dependencies", "devDependencies"],
@@ -285,29 +342,63 @@ Provide a clear, well-structured summary highlighting:
                 
                 # Combine all tags, limit to 5 total
                 all_tags = ' '.join(framework_tags[:max(0, 5 - len(languages))])
+                tags = language_tags + " " + all_tags
+                tags = tags.strip()
                 
-                # Generate a short description (first 150 chars of summary)
+                # Generate a short description from summary
                 summary = repo['summary']
-                short_description = summary.split('.')[0] + '.' if summary else ""
-                if len(short_description) > 150:
-                    short_description = short_description[:147] + "..."
+                if summary:
+                    # Clean up the summary - remove any markdown headings
+                    summary = re.sub(r'^#+\s+.*$', '', summary, flags=re.MULTILINE)
+                    summary = re.sub(r'Repository Summary:?\s*', '', summary)
+                    summary = re.sub(r'Summary of.*Repository\s*', '', summary)
+                    summary = re.sub(r'Purpose and Main Functionality\s*', '', summary)
+                    
+                    # Get the first paragraph or sentence
+                    paragraphs = [p for p in summary.split('\n\n') if p.strip()]
+                    if paragraphs:
+                        first_para = paragraphs[0].strip()
+                        # If the paragraph is too long, just take the first sentence
+                        if len(first_para) > 150:
+                            sentences = first_para.split('.')
+                            if sentences:
+                                short_description = sentences[0].strip() + '.'
+                            else:
+                                short_description = first_para[:147] + "..."
+                        else:
+                            short_description = first_para
+                    else:
+                        short_description = ""
+                else:
+                    short_description = ""
                 
-                # Write project card
+                # Ensure the description is not empty
+                if not short_description or short_description.isspace():
+                    short_description = f"A {', '.join(languages[:2])} project."
+                
+                # Write project card in a consistent format
                 f.write(f"## {repo['name']}\n\n")
                 f.write(f"**{year}**\n\n")
                 f.write(f"{short_description}\n\n")
-                f.write(f"{language_tags} {all_tags}\n\n")
+                
+                # Only write tags if there are any
+                if tags:
+                    f.write(f"{tags}\n\n")
+                
                 f.write("---\n\n")
             
             logger.info(f"Report generated: {output_file}")
 
-    def analyze_repositories(self, limit: int = None):
+    def analyze_repositories(self, limit: int = None, interactive: bool = False):
         """
         Analyze GitHub repositories.
 
         Args:
             limit: Optional maximum number of repositories to analyze. If None, analyze all repositories.
+            interactive: If True, allows skipping repositories by pressing 'S' at any time.
         """
+        global skip_current_repo
+        
         try:
             repos = self.get_all_repositories()
             repos.sort(key=lambda r: r.created_at)
@@ -318,10 +409,28 @@ Provide a clear, well-structured summary highlighting:
                 repos = repos[:limit]
 
             repo_analyses = []
+            
+            # Start key listener thread if in interactive mode
+            listener_thread = None
+            if interactive:
+                logger.info("Interactive mode enabled. Press 'S' at any time to skip the current repository.")
+                print("Interactive mode: Press 'S' at any time to skip the current repository being processed.")
+                
+                try:
+                    listener_thread = threading.Thread(target=key_listener_thread, daemon=True)
+                    listener_thread.start()
+                except Exception as e:
+                    logger.warning(f"Could not start key listener thread: {e}. Interactive mode may not work properly.")
+            
             for repo in repos:
                 try:
+                    # Reset skip flag at the start of each repository
+                    with skip_lock:
+                        skip_current_repo = False
+                    
                     logger.info(f"Analyzing repository: {repo.name}")
-
+                    print(f"Analyzing repository: {repo.name}")
+                    
                     # Basic repository data
                     repo_data = {
                         'name': repo.name,
@@ -329,16 +438,40 @@ Provide a clear, well-structured summary highlighting:
                         'frameworks': self.detect_frameworks(repo),
                         'readme': self.get_readme_content(repo)
                     }
+                    
+                    # Check if skip was requested
+                    if interactive and skip_current_repo:
+                        logger.info(f"Skipping repository: {repo.name}")
+                        print(f"Skipping repository: {repo.name}")
+                        continue
 
                     # Add code analysis
                     logger.info(f"Analyzing code content for {repo.name}")
                     repo_data['code_analysis'] = self.analyze_code_content(repo)
+                    
+                    # Check if skip was requested
+                    if interactive and skip_current_repo:
+                        logger.info(f"Skipping repository: {repo.name}")
+                        print(f"Skipping repository: {repo.name}")
+                        continue
+                    
                     logger.info(
                         f"Found {repo_data['code_analysis']['total_files']} files with {repo_data['code_analysis']['total_lines']} lines of code in {repo.name}")
 
                     # Generate summary
+                    logger.info(f"Generating summary for {repo.name}")
                     repo_data['summary'] = self.summarize_with_openai(repo_data)
+                    
+                    # Check if skip was requested
+                    if interactive and skip_current_repo:
+                        logger.info(f"Skipping repository: {repo.name}")
+                        print(f"Skipping repository: {repo.name}")
+                        continue
+                    
                     repo_analyses.append(repo_data)
+                    logger.info(f"Completed analysis of {repo.name}")
+                    print(f"Completed analysis of {repo.name}")
+                    
                 except Exception as e:
                     logger.error(f"Error analyzing repository {repo.name}: {e}")
 
@@ -461,6 +594,8 @@ def main():
     parser.add_argument('--limit', type=int, default=None, help='Maximum number of repositories to analyze (default: all)')
     parser.add_argument('--no-openai', action='store_true',
                         help='Skip OpenAI API calls and use fallback summaries only')
+    parser.add_argument('--interactive', action='store_true',
+                        help='Enable interactive mode to skip repositories during analysis')
     args = parser.parse_args()
 
     if GITHUB_TOKEN:
@@ -471,7 +606,7 @@ def main():
             logger.info("Using fallback summaries only (OpenAI API disabled)")
             analyzer.summarize_with_openai = analyzer.generate_fallback_summary
 
-        analyzer.analyze_repositories(limit=args.limit)
+        analyzer.analyze_repositories(limit=args.limit, interactive=args.interactive)
     else:
         logger.error("GitHub token not found. Please set the GITHUB_TOKEN environment variable.")
 

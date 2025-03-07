@@ -60,6 +60,7 @@ python gh-repo-analyzer.py
 
 - `--limit N`: Analyze only N repositories (if not specified, analyzes all repositories)
 - `--no-openai`: Skip OpenAI API calls and use fallback summaries only
+- `--interactive`: Enable interactive mode to skip repositories during analysis
 
 Examples:
 
@@ -72,7 +73,32 @@ python gh-repo-analyzer.py --limit 10
 
 # Analyze without using OpenAI
 python gh-repo-analyzer.py --no-openai
+
+# Enable interactive mode to skip repositories
+python gh-repo-analyzer.py --interactive
 ```
+
+## Interactive Mode
+
+When running with the `--interactive` flag, the analyzer will continuously process repositories while allowing you to skip the current one at any time by pressing 'S'. This is useful when:
+
+- You want to skip large repositories that take too long to analyze
+- You want to skip repositories that are causing errors
+- You only want to analyze specific repositories of interest
+
+The interactive mode runs a background thread that constantly listens for keyboard input, so there are no pauses or prompts - the analysis runs at full speed until you decide to skip a repository.
+
+When you press 'S':
+- The current repository's analysis will be skipped as soon as possible
+- You'll see a confirmation message that the skip was requested
+- The analyzer will move on to the next repository
+
+Example usage:
+```
+python gh-repo-analyzer.py --interactive
+```
+
+During execution, you'll see progress messages for each repository, and you can press 'S' at any time to skip the current one.
 
 ## Output
 
@@ -109,4 +135,4 @@ The tool generates a markdown report file named `github_repo_analysis.md` contai
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. 
+Contributions are welcome! Please feel free to submit a Pull Request.

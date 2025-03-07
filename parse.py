@@ -33,47 +33,55 @@ def load_markdown_file(file_path):
 # Split the markdown file into individual project sections
 def split_projects(markdown_text):
     projects = []
-    lines = markdown_text.split('\n')
+    sections = re.split(r'##\s+', markdown_text)
     
-    current_project = None
-    project_name = None
-    project_year = None
-    project_description = None
-    project_tags = None
-    
-    for i, line in enumerate(lines):
-        if line.startswith('## '):  # Project name
-            # Save previous project if exists
-            if current_project:
-                projects.append(current_project)
+    # Skip the first section (it's the title)
+    for section in sections[1:]:
+        if not section.strip():
+            continue
             
-            # Start new project
-            project_name = line.replace('## ', '').strip()
-            current_project = {
-                'name': project_name,
-                'year': None,
-                'description': None,
-                'tags': []
-            }
+        lines = section.strip().split('\n')
+        if not lines:
+            continue
+            
+        # First line is the project name
+        project_name = lines[0].strip()
         
-        elif line.startswith('**') and current_project and not current_project['year']:
+        # Initialize project data
+        project = {
+            'name': project_name,
+            'year': None,
+            'description': None,
+            'tags': []
+        }
+        
+        # Process remaining lines
+        description_lines = []
+        in_description = False
+        
+        for line in lines[1:]:
             # Year line
-            year_match = re.search(r'\*\*(\d{4})\*\*', line)
-            if year_match:
-                current_project['year'] = year_match.group(1)
+            if line.startswith('**') and '**' in line and not project['year']:
+                year_match = re.search(r'\*\*(\d{4})\*\*', line)
+                if year_match:
+                    project['year'] = year_match.group(1)
+            
+            # Tag line (contains backticks)
+            elif '`' in line and not line.startswith('```'):
+                tags = re.findall(r'`([^`]+)`', line)
+                project['tags'].extend(tags)
+            
+            # Description line (not empty, not year, not tags, not separator)
+            elif line.strip() and not line.startswith('**') and '`' not in line and '---' not in line:
+                description_lines.append(line.strip())
         
-        elif line and current_project and current_project['year'] and not current_project['description']:
-            # Description line (first non-empty line after year)
-            current_project['description'] = line.strip()
+        # Join description lines
+        if description_lines:
+            project['description'] = ' '.join(description_lines).strip()
         
-        elif '`' in line and current_project and current_project['description']:
-            # Tags line
-            tags = re.findall(r'`([^`]+)`', line)
-            current_project['tags'] = tags
-    
-    # Add the last project
-    if current_project:
-        projects.append(current_project)
+        # Add project to list if it has a name
+        if project['name']:
+            projects.append(project)
     
     return projects
 
@@ -124,39 +132,67 @@ def format_project_card(project, score=None, reason=None):
     # Create a card-like display for the project
     name = project['name']
     year = project['year'] or ""
-    description = project['description'] or ""
+    description = project['description'] or "No description available."
     tags = ' '.join([f"{tag}" for tag in project['tags']])
+    
+    # Calculate width based on name length (minimum 70)
+    width = max(70, len(name) + 20)
     
     # Format the card
     card = f"""
-┌{'─' * (len(name) + 10)}┐
-│ {name} {year.rjust(70 - len(name))} │
-├{'─' * (len(name) + 10)}┤
-│ {description[:67] + '...' if len(description) > 70 else description.ljust(70)} │
-│ {tags[:67] + '...' if len(tags) > 70 else tags.ljust(70)} │
+┌{'─' * width}┐
+│ {name} {year.rjust(width - len(name) - 1)} │
+├{'─' * width}┤
 """
     
-    if score is not None:
-        card += f"│ Score: {score}/10 {' ' * (60 - len(str(score)))} │\n"
+    # Add description with word wrapping
+    desc_words = description.split()
+    current_line = "│ "
+    for word in desc_words:
+        if len(current_line + word) > width - 1:
+            card += current_line.ljust(width + 1) + "│\n"
+            current_line = "│ " + word + " "
+        else:
+            current_line += word + " "
+    if current_line != "│ ":
+        card += current_line.ljust(width + 1) + "│\n"
     
-    if reason:
-        # Format reason to fit in the card
-        reason_lines = []
-        words = reason.split()
+    # Add empty line
+    card += "│".ljust(width + 2) + "│\n"
+    
+    # Add tags with word wrapping if there are any
+    if tags:
+        tag_words = tags.split()
         current_line = "│ "
-        for word in words:
-            if len(current_line + word) > 69:
-                reason_lines.append(current_line.ljust(70) + " │")
+        for word in tag_words:
+            if len(current_line + word) > width - 1:
+                card += current_line.ljust(width + 1) + "│\n"
                 current_line = "│ " + word + " "
             else:
                 current_line += word + " "
         if current_line != "│ ":
-            reason_lines.append(current_line.ljust(70) + " │")
-        
-        for line in reason_lines:
-            card += line + "\n"
+            card += current_line.ljust(width + 1) + "│\n"
     
-    card += f"└{'─' * (len(name) + 10)}┘\n"
+    # Add score if provided
+    if score is not None:
+        card += "│".ljust(width + 2) + "│\n"
+        card += f"│ Score: {score}/10 {' ' * (width - len(str(score)) - 10)} │\n"
+    
+    # Add reason if provided
+    if reason:
+        card += "│".ljust(width + 2) + "│\n"
+        reason_words = reason.split()
+        current_line = "│ "
+        for word in reason_words:
+            if len(current_line + word) > width - 1:
+                card += current_line.ljust(width + 1) + "│\n"
+                current_line = "│ " + word + " "
+            else:
+                current_line += word + " "
+        if current_line != "│ ":
+            card += current_line.ljust(width + 1) + "│\n"
+    
+    card += f"└{'─' * width}┘\n"
     
     return card
 
