@@ -1,14 +1,12 @@
 # My GitHub Projects
 
-## PythonProject
+## slam-kalman-localization
 
 **2025**
 
-**Repository Summary: PythonProject**
+The "slam-kalman-localization" repository is dedicated to implementing and testing SLAM (Simultaneous Localization and Mapping) techniques using Kalman filters.
 
-1.
-
- 
+`Python`
 
 ---
 
@@ -16,9 +14,7 @@
 
 **2025**
 
-## Repository Summary: GH-Repo-Analyzer
-
-### 1.
+The GH-Repo-Analyzer repository is a Python-based tool that analyzes GitHub repositories and generates comprehensive reports about their structure, technologies, and codebase.
 
 `Python` `PyGithub` `openai`
 
@@ -28,9 +24,7 @@
 
 **2025**
 
-## Repository Summary: main-portfolio
-
-### 1.
+The "main-portfolio" repository, created on March 4, 2025, is a bold and immersive portfolio for Ali Zargari, a self-made systems engineer.
 
 `TypeScript` `CSS` `JavaScript` `@cloudflare/next-on-pages` `@eslint/eslintrc`
 
@@ -40,35 +34,9 @@
 
 **2025**
 
-### Repository Summary: whopaidwho
-
-1.
+The "whopaidwho" repository is a Next.
 
 `TypeScript` `CSS` `JavaScript` `chart.js` `motion`
-
----
-
-## handshake-bootstrap
-
-**2025**
-
-### Repository Summary: handshake-bootstrap
-
-#### 1.
-
-`JavaScript` `CSS` `TypeScript` `@prisma/client` `@radix-ui/react-dialog`
-
----
-
-## Olympus-Website
-
-**2025**
-
-### Summary of Olympus-Website Repository
-
-1.
-
-`TypeScript` `CSS` `JavaScript` `next` `nodemailer`
 
 ---
 
@@ -76,35 +44,7 @@
 
 **2024**
 
-## Repository Summary: memento-prod
-
-### 1.
-
- 
-
----
-
-## react-to-figma
-
-**2024**
-
-### Repository Summary
-
-**1.
-
-`TypeScript` `CSS` `JavaScript` `class-variance-authority` `clsx`
-
----
-
-## slam-kalman-localization
-
-**2024**
-
-**Repository Summary: slam-kalman-localization**
-
-1.
-
-`Python` 
+The "memento-prod" repository is dedicated to storing the configuration files for the production environment of the Memento project.
 
 ---
 
@@ -112,12 +52,9 @@
 
 **2024**
 
-## Repository Summary: frontend
+The "frontend" repository, created in 2024, is the frontend portion of the Memento application, a web-based tool for managing personal memories.
 
-### Purpose and Main Functionality
-The "frontend" repository serves as the client-side application for the Memento...
-
-`TypeScript` `JavaScript` `CSS` 
+`TypeScript` `JavaScript` `CSS`
 
 ---
 
@@ -125,11 +62,9 @@ The "frontend" repository serves as the client-side application for the Memento.
 
 **2024**
 
-### Repository Summary: backend
+The "backend" repository, created on September 19, 2024, contains a Python project with Dockerfile support.
 
-1.
-
-`Python` `Dockerfile` 
+`Python` `Dockerfile`
 
 ---
 
@@ -137,47 +72,9 @@ The "frontend" repository serves as the client-side application for the Memento.
 
 **2024**
 
-### Repository Summary: firmware
+The "firmware" repository, created on September 19, 2024, contains the hardware/firmware code for the Memento project.
 
-1.
-
-`C` `C++` 
-
----
-
-## technical-assessment-deadline-9-23-24-ali-zargari
-
-**2024**
-
-## Repository Summary
-
-### 1.
-
-`Python` 
-
----
-
-## Portfolio
-
-**2024**
-
-### Repository Summary: Portfolio
-
-1.
-
-`TypeScript` `CSS` `JavaScript` `@radix-ui/react-slot` `@react-three/drei`
-
----
-
-## LifeLogger
-
-**2024**
-
-### Repository Summary: LifeLogger
-
-1.
-
-`JavaScript` `Python` `PLpgSQL` 
+`C` `C++`
 
 ---
 
@@ -185,58 +82,9 @@ The "frontend" repository serves as the client-side application for the Memento.
 
 **2024**
 
-**Repository Summary: Content-Generator**
-
-1.
+The "Content-Generator" repository, created in May 2024, is a Python-based project that focuses on generating content using various frameworks and libraries.
 
 `Python` `annotated-types` `anyio`
-
----
-
-## CMPE-172
-
-**2024**
-
-**Repository Summary**
-- **Purpose:** The "CMPE-172" repository was created on May 1, 2024, but no specific details on its purpose or main function...
-
- 
-
----
-
-## CMPE-172-Project
-
-**2024**
-
-## Repository Summary: CMPE-172-Project
-
-### 1.
-
- 
-
----
-
-## SocialSync
-
-**2024**
-
-### Summary of SocialSync Repository
-
-**1.
-
-`Python` `HTML` `TeX` 
-
----
-
-## XML_Validator
-
-**2024**
-
-## Repository Summary: XML_Validator
-
-### 1.
-
- 
 
 ---
 
@@ -244,11 +92,9 @@ The "frontend" repository serves as the client-side application for the Memento.
 
 **2024**
 
-### Repository Summary: XML
+Summary:
 
-#### 1.
-
-`Java` 
+`Java`
 
 ---
 
@@ -256,36 +102,9 @@ The "frontend" repository serves as the client-side application for the Memento.
 
 **2024**
 
-### Repository Summary: CS-157A-Project-DishSocial
-
-#### Purpose and Main Functionality:
-The "DishSocial" repository serves as a project for CS-157...
+Repository Name: CS-157A-Project-DishSocial
 
 `JavaScript` `CSS` `HTML` `@faker-js/faker` `mysql2`
-
----
-
-## CS157A_Part_2
-
-**2024**
-
-## Repository Summary: CS157A_Part_2
-
-### 1.
-
- 
-
----
-
-## CS157A_Part_1
-
-**2024**
-
-**Repository Summary: CS157A_Part_1**
-
-1.
-
- 
 
 ---
 
@@ -293,313 +112,19 @@ The "DishSocial" repository serves as a project for CS-157...
 
 **2024**
 
-### Summary of SmartChat Repository
-
-1.
+Summary:
 
 `JavaScript` `CSS` `HTML` `@anthropic-ai/sdk`
 
 ---
 
-## webpack-react-template
-
-**2023**
-
-## Repository Summary: webpack-react-template
-
-### 1.
-
-`JavaScript` `CSS` `HTML` `express`
-
----
-
-## CV-App
-
-**2023**
-
-### Summary of Repository: CV-App
-
-1.
-
-`JavaScript` `SCSS` `HTML` `express` `react`
-
----
-
-## react-webpack-template
-
-**2023**
-
-### Repository Summary: react-webpack-template
-
-1.
-
-`JavaScript` `CSS` `HTML` `express`
-
----
-
-## Planify
-
-**2023**
-
-### Repository Summary: Planify
-
-1.
-
-`JavaScript` `CSS` `HTML` `express`
-
----
-
-## CS_149_OS_Project
-
-**2023**
-
-**Summary of Repository: CS_149_OS_Project**
-
-1.
-
-`C++` 
-
----
-
-## React-Template
-
-**2023**
-
-### Repository Summary: React-Template
-
-1.
-
-`JavaScript` `CSS` `HTML` 
-
----
-
-## SmartTodo
-
-**2023**
-
-### Summary: SmartTodo Repository
-
-#### 1.
-
-`JavaScript` `HTML` `bootstrap` `lodash`
-
----
-
-## SVSW2
-
-**2023**
-
-## Summary: SVSW2 Repository Analysis
-
-### 1.
-
-`C++` `C` 
-
----
-
-## Safe-Validation-SW
-
-**2023**
-
-## Summary of Repository: Safe-Validation-SW
-
-### 1.
-
- 
-
----
-
-## PlanifyDev
-
-**2023**
-
-### Repository Summary: PlanifyDev
-
-1.
-
-`Java` 
-
----
-
-## FarmGame
-
-**2023**
-
-## FarmGame Repository Summary
-
-### 1.
-
-`C#` `ShaderLab` `HLSL` 
-
----
-
-## Leetcode-Problems
-
-**2022**
-
-## Repository Summary: Leetcode-Problems
-
-### Purpose and Main Functionality
-The "Leetcode-Problems" repository was created on 2022-12-19 and prima...
-
-`Java` 
-
----
-
 ## CS-131-Project-iBank
 
 **2022**
 
-## Repository Summary: CS-131-Project-iBank
+CS-131-Project-iBank
 
-### 1.
-
-`PHP` `CSS` `SCSS` 
-
----
-
-## Red-Black-Trees
-
-**2022**
-
-### Repository Summary: Red-Black-Trees
-
-1.
-
-`Java` 
-
----
-
-## CS-131-Project-iBank
-
-**2022**
-
-**Repository Summary: CS-131-Project-iBank**
-
-1.
-
-`PHP` `CSS` `SCSS` 
-
----
-
-## TODO-V2
-
-**2022**
-
-### Repository Summary: TODO-V2
-
-1.
-
-`JavaScript` `SCSS` `HTML` `express` `lodash`
-
----
-
-## CS-146-Q-6
-
-**2022**
-
-### Repository Summary: CS-146-Q-6
-
-1.
-
-`Java` 
-
----
-
-## Partition-and-Radix
-
-**2022**
-
-## Repository Summary: Partition-and-Radix
-
-### 1.
-
-`Java` 
-
----
-
-## Heap
-
-**2022**
-
-### Repository Summary: Heap
-
-1.
-
-`Java` 
-
----
-
-## CS-151-HW1
-
-**2022**
-
-**Repository Summary: CS-151-HW1**
-
-1.
-
-`Java` 
-
----
-
-## ali-zargari-CS146---Assignment-2
-
-**2022**
-
-## Repository Summary
-
-### 1.
-
-`Java` 
-
----
-
-## myPortfolio
-
-**2022**
-
-### Repository Summary: myPortfolio
-
-1.
-
-`HTML` `CSS` `JavaScript` 
-
----
-
-## CMPE-131-HW1
-
-**2022**
-
-## Repository Summary: CMPE-131-HW1
-
-### 1.
-
-`HTML` `CSS` `JavaScript` 
-
----
-
-## LinkedList
-
-**2022**
-
-### Repository Summary: LinkedList
-
-#### 1.
-
-`Java` 
-
----
-
-## CS146---Assignment-1
-
-**2022**
-
-## Repository Summary: CS146---Assignment-1
-
-### Purpose and Main Functionality:
-The repository "CS146---Assignment-1" serves as an assignment subm...
-
-`Java` 
+`PHP` `CSS` `SCSS`
 
 ---
 
@@ -607,23 +132,9 @@ The repository "CS146---Assignment-1" serves as an assignment subm...
 
 **2021**
 
-## Repository Summary: Page
-
-### 1.
+The "Page" repository serves as a main hub for the developer's projects and showcases a transition made from scratch.
 
 `JavaScript` `SCSS` `animate.css` `gh-pages`
-
----
-
-## webpack-template
-
-**2021**
-
-**Repository Summary: webpack-template**
-
-1.
-
-`JavaScript` `CSS` `lodash` `css-loader`
 
 ---
 
@@ -631,12 +142,9 @@ The repository "CS146---Assignment-1" serves as an assignment subm...
 
 **2021**
 
-## Repository Summary: Tic-Tac-Toe
+Tic-Tac-Toe is a web-based game application created using JavaScript, CSS, and HTML.
 
-### Purpose and Main Functionality
-The "Tic-Tac-Toe" repository is a web-based implementation of the classic Ti...
-
-`JavaScript` `CSS` `HTML` 
+`JavaScript` `CSS` `HTML`
 
 ---
 
@@ -644,107 +152,9 @@ The "Tic-Tac-Toe" repository is a web-based implementation of the classic Ti...
 
 **2021**
 
-### Repository Summary: TODO-App
+Summary:
 
-1.
-
-`JavaScript` `CSS` `HTML` 
-
----
-
-## 1C-2
-
-**2021**
-
-### Repository Summary: 1C-2
-
-1.
-
-`Java` 
-
----
-
-## 1C-1
-
-**2021**
-
-### Repository Summary
-
-1.
-
-`Java` 
-
----
-
-## 1C-8
-
-**2021**
-
-## Summary of Repository: 1C-8
-
-### 1.
-
-`Java` 
-
----
-
-## 1C-7
-
-**2021**
-
-**Repository Summary: 1C-7**
-
-**1.
-
-`Java` 
-
----
-
-## 1C-6
-
-**2021**
-
-**Repository Summary: 1C-6**
-
-**1.
-
-`Java` 
-
----
-
-## 1C-5
-
-**2021**
-
-### Repository Summary: 1C-5
-
-1.
-
-`Java` 
-
----
-
-## 1C-4
-
-**2021**
-
-**Repository Summary: 1C-4**
-
-1.
-
-`Java` 
-
----
-
-## 1C-3
-
-**2021**
-
-### Repository Summary
-
-1.
-
-`Java` 
+`JavaScript` `CSS` `HTML`
 
 ---
 
@@ -752,177 +162,9 @@ The "Tic-Tac-Toe" repository is a web-based implementation of the classic Ti...
 
 **2021**
 
-## Repository Summary: Sketch
-
-### 1.
-
-`JavaScript` `HTML` 
-
----
-
-## JS-Test
-
-**2021**
-
-### Repository Summary: JS-Test
-
-1.
-
-`HTML` 
-
----
-
-## prototype-site
-
-**2021**
-
 Summary:
-The "prototype-site" repository serves as a skeleton for a website, configured for Chrome access via a GitHub Pages link provided in the R...
 
-`CSS` `HTML` `JavaScript` 
-
----
-
-## Personal-Page
-
-**2021**
-
-## Repository Summary: Personal-Page
-
-### 1.
-
-`HTML` `CSS` `JavaScript` 
-
----
-
-## Java
-
-**2021**
-
-## Repository Summary:
-### Purpose and Main Functionality:
-The Java repository contains files from the 2012-2013 school year for a Java Class at Mo...
-
- 
-
----
-
-## ali-zargari-cs1c-project08
-
-**2021**
-
-### Repository Summary
-
-**1.
-
-`Java` 
-
----
-
-## ali-zargari-cs1c-project07
-
-**2021**
-
-**Repository Summary: ali-zargari-cs1c-project07**
-
-1.
-
-`Java` 
-
----
-
-## ali-zargari-cs1c-project06
-
-**2021**
-
-### Repository Summary
-
-**1.
-
-`Java` 
-
----
-
-## ali-zargari-cs1c-project05
-
-**2021**
-
-### Repository Summary
-
-**1.
-
-`Java` 
-
----
-
-## ali-zargari-cs1c-project04
-
-**2021**
-
-**Repository Summary: ali-zargari-cs1c-project04**
-
-1.
-
-`Java` 
-
----
-
-## ali-zargari-cs1c-project03
-
-**2021**
-
-### Repository Summary
-
-**1.
-
-`Java` 
-
----
-
-## ali-zargari-cs1c-project02
-
-**2021**
-
-**Repository Summary: ali-zargari-cs1c-project02**
-
-1.
-
-`Java` 
-
----
-
-## ali-zargari-cs1c-project01
-
-**2021**
-
-### Repository Summary
-
-#### 1.
-
-`Java` 
-
----
-
-## example_program_submission
-
-**2021**
-
-**Repository Summary**
-1.
-
-`Java` 
-
----
-
-## course_examples
-
-**2021**
-
-### Repository Summary: course_examples
-
-1.
-
-`Java` 
+`JavaScript` `HTML`
 
 ---
 

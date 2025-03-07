@@ -113,11 +113,32 @@ class GitHubRepoAnalyzer:
     def get_all_repositories(self) -> List[Repository.Repository]:
         try:
             repos = list(self.user.get_repos())
-            logger.info(f"Found {len(repos)} repositories")
+            logger.info(f"Found {len(repos)} repositories in user account")
             return repos
         except GithubException as e:
             logger.error(f"Error fetching repositories: {e}")
             return []
+
+    def get_organization_repositories(self, org_name: str) -> List[Repository.Repository]:
+        """Get repositories from a specific organization."""
+        try:
+            org = self.github.get_organization(org_name)
+            repos = list(org.get_repos())
+            logger.info(f"Found {len(repos)} repositories in organization {org_name}")
+            return repos
+        except GithubException as e:
+            logger.error(f"Error fetching repositories from organization {org_name}: {e}")
+            return []
+
+    def get_repository_by_full_name(self, full_name: str) -> Optional[Repository.Repository]:
+        """Get a specific repository by its full name (owner/repo)."""
+        try:
+            repo = self.github.get_repo(full_name)
+            logger.info(f"Found repository: {full_name}")
+            return repo
+        except GithubException as e:
+            logger.error(f"Error fetching repository {full_name}: {e}")
+            return None
 
     def get_repo_languages(self, repo: Repository.Repository) -> Dict[str, int]:
         try:
@@ -199,23 +220,18 @@ class GitHubRepoAnalyzer:
         total_lines = code_analysis.get('total_lines', 0)
         main_file_types = code_analysis.get('main_file_types', [])
 
-        # Create a simple summary
-        summary = f"This repository is named '{repo_data['name']}' and was created on {repo_data['created_at'].strftime('%Y-%m-%d')}. "
-        summary += f"It primarily uses {languages}. "
-
-        if frameworks_list:
-            summary += f"The project utilizes {frameworks_str}. "
-
-        # Add code analysis information
-        if total_files > 0:
-            summary += f"The codebase consists of {total_files} files with approximately {total_lines} lines of code. "
-            if main_file_types:
-                summary += f"The main file types are {', '.join(main_file_types)}. "
-
-        if readme_snippet != "No README available":
-            summary += f"README excerpt: {readme_snippet}"
-
-        return summary
+        # Create a simple JSON summary
+        fallback_json = {
+            "name": repo_data['name'],
+            "year": repo_data['created_at'].strftime('%Y'),
+            "purpose": f"A project using {languages}. {readme_snippet}",
+            "technologies": languages.split(', '),
+            "features": ["Unknown"],
+            "architecture": f"Contains {total_files} files with approximately {total_lines} lines of code",
+            "complexity": "Unknown"
+        }
+        
+        return json.dumps(fallback_json, indent=2)
 
     def summarize_with_openai(self, repo_data: Dict[str, Any]) -> str:
         try:
@@ -236,31 +252,35 @@ class GitHubRepoAnalyzer:
             if readme is None:
                 readme_excerpt = "No README available"
             else:
-                readme_excerpt = readme[:1000]
+                readme_excerpt = readme[:1500]  # Increased from 1000 to get more context
 
             # Get code analysis information
             code_analysis = repo_data.get('code_analysis', {})
             total_files = code_analysis.get('total_files', 0)
             total_lines = code_analysis.get('total_lines', 0)
             main_file_types = code_analysis.get('main_file_types', [])
+            
+            # Get file types for better analysis
+            file_types = code_analysis.get('file_types', {})
+            file_types_str = "\n".join([f"{ext}: {count} files" for ext, count in file_types.items()]) if file_types else "No file types detected"
 
-            # Get code samples for analysis
+            # Get code samples for analysis - include more samples for better understanding
             code_samples = code_analysis.get('code_samples', {})
             code_samples_text = ""
             for ext, samples in code_samples.items():
                 if samples:
-                    # Take just the first sample for each file type to keep the prompt size reasonable
-                    sample = samples[0]
-                    code_samples_text += f"\nSample {ext} code from {sample['path']}:\n```\n{sample['sample']}\n```\n"
+                    # Take up to 3 samples per extension for better code understanding
+                    for i, sample in enumerate(samples[:3]):
+                        code_samples_text += f"\nSample {i+1} of {ext} code from {sample['path']}:\n```\n{sample['sample']}\n```\n"
 
-            # Prepare file structure overview
+            # Prepare file structure overview - include more files for better context
             structure_overview = code_analysis.get('structure_overview', [])
-            structure_text = "\n".join(structure_overview[:30])  # Limit to 30 items to keep prompt size reasonable
+            structure_text = "\n".join(structure_overview[:50])  # Increased from 30 to 50 items
 
             prompt = f"""
-You are a technical documentation assistant. Given the following repository details, generate a concise and informative summary:
+You are a technical expert analyzing a software project. Based on the following information, make informed assumptions about the project's purpose, technologies, and functionality. Focus on analyzing the code, file names, and structure rather than just descriptions.
 
-Repository Name: {repo_data['name']}
+Project Name: {repo_data['name']}
 Created On: {repo_data['created_at'].strftime('%Y-%m-%d')}
 Languages: {languages}
 Frameworks and Libraries:
@@ -271,6 +291,9 @@ Code Analysis:
 - Total Lines of Code: {total_lines}
 - Main File Types: {', '.join(main_file_types) if main_file_types else "None detected"}
 
+Detailed File Types:
+{file_types_str}
+
 File Structure Overview:
 {structure_text}
 
@@ -279,23 +302,32 @@ File Structure Overview:
 README Excerpt:
 {readme_excerpt}
 
-Provide a clear, well-structured summary highlighting:
-1. The repository's purpose and main functionality
-2. Key technologies and programming languages used
-3. Code organization and architecture
-4. Notable features or patterns observed in the code
-5. Any other relevant insights from the code analysis
+Based on the code samples, file names, and project structure, provide a detailed analysis of this project. Make intelligent assumptions about what the project does, how it works, and its purpose. Don't just rely on the README or project name.
+
+Respond with a JSON object in the following format:
+{{
+  "name": "{repo_data['name']}",
+  "year": {repo_data['created_at'].strftime('%Y')},
+  "purpose": "A detailed description of what this project does and its main purpose. Avoid using the word 'repository'.",
+  "technologies": ["List", "of", "key", "technologies", "used"],
+  "features": ["List", "of", "main", "features", "or", "capabilities"],
+  "architecture": "Brief description of the project's architecture or structure",
+  "complexity": "Assessment of the project's technical complexity (Low, Medium, High)"
+}}
+
+Ensure your response is valid JSON. Make your purpose description detailed and specific, focusing on what the project actually does rather than generic descriptions.
 """
             try:
                 response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4-turbo",  # Using GPT-4 for better code analysis
                     messages=[
                         {"role": "system",
-                         "content": "You are a helpful technical documentation writer with expertise in code analysis."},
+                         "content": "You are a technical expert with deep knowledge of software development, programming languages, and system architecture. Your task is to analyze project information and provide detailed, technically accurate assessments based on code analysis rather than descriptions."},
                         {"role": "user", "content": prompt}
                     ],
-                    temperature=0.7,
-                    max_tokens=500
+                    temperature=0.3,  # Lower temperature for more focused, precise output
+                    max_tokens=1000,   # Increased token limit for more detailed responses
+                    response_format={"type": "json_object"}  # Ensure JSON response
                 )
 
                 # Check if response has the expected structure
@@ -316,95 +348,95 @@ Provide a clear, well-structured summary highlighting:
             logger.error(f"Error generating summary with OpenAI for {repo_data['name']}: {e}")
             return self.generate_fallback_summary(repo_data)
 
-    def generate_markdown_report(self, repo_analyses: List[Dict[str, Any]],
-                                 output_file: str = "github_repo_analysis.md"):
+    def generate_json_report(self, repo_analyses: List[Dict[str, Any]],
+                             output_file: str = "github_repo_analysis.json"):
+        """Generate a JSON report of repository analyses."""
+        # Sort repositories by creation date (newest first)
+        sorted_repos = sorted(repo_analyses, key=lambda r: r['created_at'], reverse=True)
+        
+        # Prepare JSON data
+        json_data = []
+        for repo in sorted_repos:
+            try:
+                # Parse the JSON summary
+                summary_json = json.loads(repo['summary'])
+                json_data.append(summary_json)
+            except json.JSONDecodeError:
+                # If the summary is not valid JSON, create a basic entry
+                json_data.append({
+                    "name": repo['name'],
+                    "year": repo['created_at'].strftime('%Y'),
+                    "purpose": "Could not parse project information",
+                    "technologies": repo['frameworks'].get('languages', []),
+                    "features": [],
+                    "architecture": "Unknown",
+                    "complexity": "Unknown"
+                })
+        
+        # Write the JSON file
         with open(output_file, 'w', encoding='utf-8') as f:
-            f.write("# My GitHub Projects\n\n")
-            
-            # Sort repositories by creation date (newest first)
-            sorted_repos = sorted(repo_analyses, key=lambda r: r['created_at'], reverse=True)
-            
-            for repo in sorted_repos:
-                # Get creation year
-                year = repo['created_at'].strftime('%Y')
-                
-                # Get languages as tags
-                languages = repo['frameworks'].get('languages', [])
-                language_tags = ' '.join([f"`{lang}`" for lang in languages[:3]])  # Limit to top 3 languages
-                
-                # Get frameworks as additional tags
-                framework_tags = []
-                for fw, libs in repo['frameworks'].items():
-                    if fw != 'languages' and libs:
-                        # Take up to 2 libraries per framework
-                        for lib in libs[:2]:
-                            framework_tags.append(f"`{lib}`")
-                
-                # Combine all tags, limit to 5 total
-                all_tags = ' '.join(framework_tags[:max(0, 5 - len(languages))])
-                tags = language_tags + " " + all_tags
-                tags = tags.strip()
-                
-                # Generate a short description from summary
-                summary = repo['summary']
-                if summary:
-                    # Clean up the summary - remove any markdown headings
-                    summary = re.sub(r'^#+\s+.*$', '', summary, flags=re.MULTILINE)
-                    summary = re.sub(r'Repository Summary:?\s*', '', summary)
-                    summary = re.sub(r'Summary of.*Repository\s*', '', summary)
-                    summary = re.sub(r'Purpose and Main Functionality\s*', '', summary)
-                    
-                    # Get the first paragraph or sentence
-                    paragraphs = [p for p in summary.split('\n\n') if p.strip()]
-                    if paragraphs:
-                        first_para = paragraphs[0].strip()
-                        # If the paragraph is too long, just take the first sentence
-                        if len(first_para) > 150:
-                            sentences = first_para.split('.')
-                            if sentences:
-                                short_description = sentences[0].strip() + '.'
-                            else:
-                                short_description = first_para[:147] + "..."
-                        else:
-                            short_description = first_para
-                    else:
-                        short_description = ""
-                else:
-                    short_description = ""
-                
-                # Ensure the description is not empty
-                if not short_description or short_description.isspace():
-                    short_description = f"A {', '.join(languages[:2])} project."
-                
-                # Write project card in a consistent format
-                f.write(f"## {repo['name']}\n\n")
-                f.write(f"**{year}**\n\n")
-                f.write(f"{short_description}\n\n")
-                
-                # Only write tags if there are any
-                if tags:
-                    f.write(f"{tags}\n\n")
-                
-                f.write("---\n\n")
-            
-            logger.info(f"Report generated: {output_file}")
+            json.dump(json_data, f, indent=2)
+        
+        logger.info(f"JSON report generated: {output_file}")
 
-    def analyze_repositories(self, limit: int = None, interactive: bool = False):
+    def analyze_repositories(self, limit: int = None, interactive: bool = False, specific_repos: List[str] = None):
         """
         Analyze GitHub repositories.
 
         Args:
             limit: Optional maximum number of repositories to analyze. If None, analyze all repositories.
             interactive: If True, allows skipping repositories by pressing 'S' at any time.
+            specific_repos: Optional list of repository names to analyze. If provided, only these repositories will be analyzed.
+                           Can include full repository names (owner/repo) for repositories in organizations.
         """
         global skip_current_repo
         
         try:
-            repos = self.get_all_repositories()
+            # Get repositories based on specific_repos parameter
+            if specific_repos:
+                logger.info(f"Preparing to analyze {len(specific_repos)} specific repositories")
+                repos = []
+                
+                for repo_name in specific_repos:
+                    # Check if it's a full repository name (contains a slash)
+                    if '/' in repo_name:
+                        # It's a full repository name (owner/repo)
+                        repo = self.get_repository_by_full_name(repo_name)
+                        if repo:
+                            repos.append(repo)
+                    else:
+                        # It's a repository name in the user's account
+                        # We'll find it later when we get all user repos
+                        pass
+                
+                # Get user repositories to find the ones specified by name only
+                user_repos = self.get_all_repositories()
+                
+                # Add repositories from user account that match the names in specific_repos
+                for repo in user_repos:
+                    if repo.name in specific_repos and not any(r.name == repo.name for r in repos):
+                        repos.append(repo)
+                        logger.info(f"Found repository in user account: {repo.name}")
+                
+                # Check if we found all the repositories
+                found_repo_names = set(repo.name for repo in repos) | set(repo.full_name for repo in repos)
+                missing_repos = set(specific_repos) - found_repo_names
+                
+                if missing_repos:
+                    logger.warning(f"Could not find {len(missing_repos)} repositories: {', '.join(missing_repos)}")
+                    print(f"Warning: Could not find these repositories: {', '.join(missing_repos)}")
+                
+                logger.info(f"Analyzing {len(repos)} repositories from the specified list")
+                print(f"Analyzing {len(repos)} repositories from the specified list")
+            else:
+                # Get all repositories from the user's account
+                repos = self.get_all_repositories()
+            
+            # Sort repositories by creation date
             repos.sort(key=lambda r: r.created_at)
 
             # Limit the number of repositories if specified
-            if limit is not None and limit > 0:
+            if limit is not None and limit > 0 and len(repos) > limit:
                 logger.info(f"Limiting analysis to {limit} repositories")
                 repos = repos[:limit]
 
@@ -476,7 +508,7 @@ Provide a clear, well-structured summary highlighting:
                     logger.error(f"Error analyzing repository {repo.name}: {e}")
 
             if repo_analyses:
-                self.generate_markdown_report(repo_analyses)
+                self.generate_json_report(repo_analyses)
             else:
                 logger.warning("No repositories were successfully analyzed.")
         except Exception as e:
@@ -596,6 +628,8 @@ def main():
                         help='Skip OpenAI API calls and use fallback summaries only')
     parser.add_argument('--interactive', action='store_true',
                         help='Enable interactive mode to skip repositories during analysis')
+    parser.add_argument('--repo-file', type=str, default='repos.txt',
+                        help='Path to a text file containing repository names to analyze (one per line)')
     args = parser.parse_args()
 
     if GITHUB_TOKEN:
@@ -606,7 +640,22 @@ def main():
             logger.info("Using fallback summaries only (OpenAI API disabled)")
             analyzer.summarize_with_openai = analyzer.generate_fallback_summary
 
-        analyzer.analyze_repositories(limit=args.limit, interactive=args.interactive)
+        # Check if repo file exists and has content
+        specific_repos = []
+        if args.repo_file and os.path.exists(args.repo_file):
+            try:
+                with open(args.repo_file, 'r') as f:
+                    lines = f.readlines()
+                    specific_repos = [line.strip() for line in lines 
+                                     if line.strip() and not line.strip().startswith('#')]
+                if specific_repos:
+                    logger.info(f"Found {len(specific_repos)} repositories in {args.repo_file}")
+                    print(f"Found {len(specific_repos)} repositories in {args.repo_file}")
+            except Exception as e:
+                logger.error(f"Error reading repo file {args.repo_file}: {e}")
+                print(f"Error reading repo file {args.repo_file}: {e}")
+
+        analyzer.analyze_repositories(limit=args.limit, interactive=args.interactive, specific_repos=specific_repos)
     else:
         logger.error("GitHub token not found. Please set the GITHUB_TOKEN environment variable.")
 

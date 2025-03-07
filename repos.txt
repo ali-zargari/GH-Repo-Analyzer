@@ -1,0 +1,24 @@
+# List your repository names here (one per line)
+# Lines starting with # are ignored
+
+# Repositories in your account:
+GH-Repo-Analyzer
+main-portfolio
+whopaidwho
+slam-kalman-localization
+Content-Generator
+XML
+SmartChat
+CS-157A-Project-DishSocial
+CS-131-Project-iBank
+Tic-Tac-Toe
+TODO-App
+Page
+Sketch
+
+# Repositories in organizations or other accounts (use full name with owner):
+SJSU-Memento/frontend
+SJSU-Memento/backend
+SJSU-Memento/firmware
+SJSU-Memento/memento-prod
+

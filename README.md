@@ -61,6 +61,7 @@ python gh-repo-analyzer.py
 - `--limit N`: Analyze only N repositories (if not specified, analyzes all repositories)
 - `--no-openai`: Skip OpenAI API calls and use fallback summaries only
 - `--interactive`: Enable interactive mode to skip repositories during analysis
+- `--repo-file FILE`: Path to a text file containing repository names to analyze (default: repos.txt)
 
 Examples:
 
@@ -76,7 +77,48 @@ python gh-repo-analyzer.py --no-openai
 
 # Enable interactive mode to skip repositories
 python gh-repo-analyzer.py --interactive
+
+# Analyze only specific repositories listed in a file
+python gh-repo-analyzer.py --repo-file my_repos.txt
 ```
+
+## Analyzing Specific Repositories
+
+You can create a text file (default name: `repos.txt`) containing the names of specific repositories you want to analyze:
+
+```
+# This is a comment (lines starting with # are ignored)
+repo-name-1
+repo-name-2
+repo-name-3
+```
+
+For repositories in GitHub Organizations or other accounts, use the full repository name with the owner:
+
+```
+# Repositories in your account
+your-repo-1
+your-repo-2
+
+# Repositories in organizations or other accounts
+organization-name/repo-name
+another-org/their-repo
+username/personal-repo
+```
+
+When you run the analyzer with the `--repo-file` option, it will only process the repositories listed in this file:
+
+```
+python gh-repo-analyzer.py --repo-file my_repos.txt
+```
+
+If the file is empty or doesn't exist, the analyzer will process all repositories in your account as usual.
+
+This feature is useful when:
+- You only want to analyze a few specific repositories
+- You want to analyze repositories from different organizations
+- You want to re-analyze repositories that had errors
+- You want to create different groups of repositories for separate analyses
 
 ## Interactive Mode
 
