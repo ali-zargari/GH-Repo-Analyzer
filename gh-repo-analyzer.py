@@ -262,53 +262,43 @@ Provide a clear, well-structured summary highlighting:
     def generate_markdown_report(self, repo_analyses: List[Dict[str, Any]],
                                  output_file: str = "github_repo_analysis.md"):
         with open(output_file, 'w', encoding='utf-8') as f:
-            f.write("# GitHub Repository Analysis Report\n\n")
-            f.write(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-            for repo in repo_analyses:
-                f.write(f"## {repo['name']}\n\n")
-                f.write(f"**Creation Date:** {repo['created_at'].strftime('%Y-%m-%d')}\n\n")
-
-                # Languages section
+            f.write("# My GitHub Projects\n\n")
+            
+            # Sort repositories by creation date (newest first)
+            sorted_repos = sorted(repo_analyses, key=lambda r: r['created_at'], reverse=True)
+            
+            for repo in sorted_repos:
+                # Get creation year
+                year = repo['created_at'].strftime('%Y')
+                
+                # Get languages as tags
                 languages = repo['frameworks'].get('languages', [])
-                f.write("**Languages:**\n\n" + "\n".join(f"- {lang}" for lang in languages) + "\n\n")
-
-                # Frameworks section
-                frameworks = "\n".join(f"- **{fw}:** {', '.join(libs)}" for fw, libs in repo['frameworks'].items() if
-                                       fw != 'languages' and libs)
-                f.write("**Frameworks/Libraries:**\n\n" + (frameworks or "- No specific frameworks detected") + "\n\n")
-
-                # Code analysis section
-                code_analysis = repo.get('code_analysis', {})
-                if code_analysis and code_analysis.get('total_files', 0) > 0:
-                    f.write("**Code Analysis:**\n\n")
-                    f.write(f"- **Total Files:** {code_analysis.get('total_files', 0)}\n")
-                    f.write(f"- **Total Lines of Code:** {code_analysis.get('total_lines', 0)}\n")
-
-                    # File types
-                    if code_analysis.get('file_types'):
-                        f.write("- **File Types:**\n")
-                        for ext, count in sorted(code_analysis['file_types'].items(), key=lambda x: x[1], reverse=True)[
-                                          :10]:
-                            f.write(f"  - {ext}: {count} files\n")
-
-                    # Main file types
-                    if code_analysis.get('main_file_types'):
-                        f.write(f"- **Main File Types:** {', '.join(code_analysis['main_file_types'])}\n")
-
-                    f.write("\n")
-
-                    # File structure (limited to keep the report readable)
-                    if code_analysis.get('structure_overview'):
-                        f.write("**File Structure Overview:**\n\n")
-                        f.write("```\n")
-                        for item in code_analysis['structure_overview'][:30]:
-                            f.write(f"{item}\n")
-                        if len(code_analysis['structure_overview']) > 30:
-                            f.write("... (more files/directories)\n")
-                        f.write("```\n\n")
-
-                # Summary section
-                f.write(f"**Summary:**\n\n{repo['summary']}\n\n---\n\n")
+                language_tags = ' '.join([f"`{lang}`" for lang in languages[:3]])  # Limit to top 3 languages
+                
+                # Get frameworks as additional tags
+                framework_tags = []
+                for fw, libs in repo['frameworks'].items():
+                    if fw != 'languages' and libs:
+                        # Take up to 2 libraries per framework
+                        for lib in libs[:2]:
+                            framework_tags.append(f"`{lib}`")
+                
+                # Combine all tags, limit to 5 total
+                all_tags = ' '.join(framework_tags[:max(0, 5 - len(languages))])
+                
+                # Generate a short description (first 150 chars of summary)
+                summary = repo['summary']
+                short_description = summary.split('.')[0] + '.' if summary else ""
+                if len(short_description) > 150:
+                    short_description = short_description[:147] + "..."
+                
+                # Write project card
+                f.write(f"## {repo['name']}\n\n")
+                f.write(f"**{year}**\n\n")
+                f.write(f"{short_description}\n\n")
+                f.write(f"{language_tags} {all_tags}\n\n")
+                f.write("---\n\n")
+            
             logger.info(f"Report generated: {output_file}")
 
     def analyze_repositories(self, limit: int = None):
